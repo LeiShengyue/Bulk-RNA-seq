@@ -1,5 +1,4 @@
-#小周的bulkRNA数据
-
+#小周的bulkRNAseq解析
 setwd("/path/to/your/own/Input")
 
 # Import packages ---------------------------------------------------------
@@ -47,19 +46,19 @@ rownames(Data) <- row_names
 Data <- Data[,-1]
 
 #她想把这个表现矩阵存下来
-#write.csv(Data,  "./231110_Data integration/Output/231110 read count.csv") ##save csv file
+#write.csv(Data,  "read count.csv") ##save csv file
 
 #cut-offf(read count >10) ---------------------------------过滤了一下
 data <- filter_all(Data, all_vars(. >=10))
 
 #她又想把过滤完的矩阵存下来
-#write.csv(data,  "./231110_Data integration/Output/231110 read count>10.csv") ##save csv file
+#write.csv(data,  "read count>10.csv") ##save csv file
 
 # Calculate logCPM ---好像是把原来的raw counts给标准化为一个计数形式-------------------------------------------
 logcpm <- cpm(Data, log=TRUE)
 logcpm
 
-#write.csv(Data,  "./231110_Data integration/Output/231110 logCPM.csv")
+#write.csv(Data,  "logCPM.csv")
 
 # Hierarchical clustering --计算相关性然后聚类------------------------------------
 #Hierarchical clustering between samples
@@ -113,7 +112,6 @@ par(xpd=TRUE)
 legend(x=par()$usr[2], y=par()$usr[4], legend = colnames(logcpm), bty = "n", pch = 19,  col  = color, pt.cex =1.5)
 
 #DEG
-#你那个代码她把保存了的过滤后矩阵又读进来弄的，我是直接环境里还有，就没重新读，继续
 
 # 把data变成矩阵
 data <- as.matrix(data)
@@ -150,7 +148,7 @@ FC1 <- FC1 %>%
   mutate(Expression = case_when(logFC >= 0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Up-regulated",           
                                 logFC <= -0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Down-regulated",
                                 TRUE ~ "Unchanged"))##FC>1.5, logCPM >1, FDR <0.05
-# write.csv(FC1, "/Users/asakawayuuki/Desktop/がん研/RNAseq/小周的结果保存/DEG_aPD-L1 vs Vehicle.csv")
+# write.csv(FC1, "DEG_aPD-L1 vs Vehicle.csv")
 
 
 
@@ -162,7 +160,7 @@ FC2 <- FC2 %>%
   mutate(Expression = case_when(logFC >= 0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Up-regulated",           
                                 logFC <= -0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Down-regulated",
                                 TRUE ~ "Unchanged"))##FC>1.5, logCPM >1, FDR <0.05
-# write.csv(FC2, "/Users/asakawayuuki/Desktop/がん研/RNAseq/小周的结果保存/DEG_KO_aPD-L1 vs KO_Vehicle.csv")
+# write.csv(FC2, "DEG_KO_aPD-L1 vs KO_Vehicle.csv")
 
 
 ### KO_Vehicle vs Vehicle ###
@@ -173,7 +171,7 @@ FC3 <- FC3 %>%
   mutate(Expression = case_when(logFC >= 0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Up-regulated",           
                                 logFC <= -0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Down-regulated",
                                 TRUE ~ "Unchanged"))##FC>1.5, logCPM >1, FDR <0.05
-# write.csv(FC3, "/Users/asakawayuuki/Desktop/がん研/RNAseq/小周的结果保存/DEG_KO_Vehicle vs Vehicle.csv")
+# write.csv(FC3, "DEG_KO_Vehicle vs Vehicle.csv")
 
 
 ### KO_aPD-L1 vs aPD-L1 ###
@@ -184,7 +182,7 @@ FC4 <- FC4 %>%
   mutate(Expression = case_when(logFC >= 0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Up-regulated",           
                                 logFC <= -0.585 & logCPM >= 0.301 & FDR < 0.05 ~ "Down-regulated",
                                 TRUE ~ "Unchanged"))##FC>1.5, logCPM >1, FDR <0.05
-# write.csv(FC4, "/Users/asakawayuuki/Desktop/がん研/RNAseq/小周的结果保存/DEG_KO_aPD-L1 vs PD-L1.csv")
+# write.csv(FC4, "DEG_KO_aPD-L1 vs PD-L1.csv")
 
 
 #火山图
@@ -290,10 +288,6 @@ top_genes_1
 top_genes_1 <- top_genes_1 %>%
   rownames_to_column(var = "Gene")
 
-# write.csv(top_genes_1,"./231110_Data integration/Output/Top genes/Top genes_RK-582 vs Vehicle.csv" )
-# top_genes_1 <- read.csv("./231110_Data integration/Output/Top genes/Top genes_RK-582 vs Vehicle.csv" )
-# colnames(top_genes_1) <- c("Gene", "logFC" , "logCPM", "PValue", "Expression")
-
 ma1 <- ggplot(FC1, aes(x=logFC, y=logCPM, colour=Expression)) + 
   geom_point(alpha=0.8) + 
   ylim(-3,20) +
@@ -310,7 +304,6 @@ ma1 <- ggplot(FC1, aes(x=logFC, y=logCPM, colour=Expression)) +
   geom_vline(xintercept=c(-0.585,0.585),lty=2,col="black",lwd=0.4) +
   geom_hline(yintercept=0.301,lty=2,col="black",lwd=0.4) +  
   labs(x="log2(FC)",y="log2CPM")+guides(colour = guide_legend(override.aes = list(size = 4)))+ geom_text_repel(data = top_genes_1, label = (top_genes_1$Gene), box.padding = unit(.100, "lines"),hjust= 0.30, size = 3, force = 1, nudge_y = 1, color ="black") 
-
 
 ma1
 
